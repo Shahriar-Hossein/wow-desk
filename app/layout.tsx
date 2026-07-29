@@ -1,27 +1,22 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Inter, Space_Grotesk } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const barlow = Barlow({
+  variable: "--font-barlow",
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
-
-const ibmPlexMono = IBM_Plex_Mono({
-  variable: "--font-ibm-plex-mono",
-  weight: ["400", "500"],
+const barlowCondensed = Barlow_Condensed({
+  variable: "--font-barlow-condensed",
+  weight: ["400", "600"],
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "WowDesk — Customer messaging & CRM",
-  description:
-    "Live chat widget and agent inbox for WowStore merchants, by WPXPO.",
+  title: "WowDesk — Support workspace",
+  description: "Agent inbox for WPXPO's WordPress and Shopify customers.",
 };
 
 export default function RootLayout({
@@ -32,7 +27,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${inter.variable} ${spaceGrotesk.variable} ${ibmPlexMono.variable} h-full antialiased`}
+      className={`${barlow.variable} ${barlowCondensed.variable} h-full antialiased`}
     >
       <body className="flex h-full flex-col overflow-hidden">{children}</body>
     </html>

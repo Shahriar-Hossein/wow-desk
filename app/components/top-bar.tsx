@@ -1,33 +1,40 @@
-import type { BridgeSignal } from "./workspace";
+import { CURRENT_AGENT } from "@/app/lib/types";
 
-export function TopBar({ bridge }: { bridge: BridgeSignal | null }) {
+export function TopBar({ onOpenWidget }: { onOpenWidget: () => void }) {
+  const initials = CURRENT_AGENT.split(" ")
+    .map((w) => w[0])
+    .join("");
+
   return (
-    <header className="flex h-14 flex-none items-center justify-between bg-ink px-5 text-white">
-      <div className="flex items-center gap-2.5">
-        <div className="flex size-6.5 items-center justify-center rounded-[7px] bg-[linear-gradient(135deg,var(--color-accent),var(--color-accent-dark))] font-display text-sm font-bold text-[#0b1a18]">
-          W
+    <header className="flex flex-none items-center justify-between gap-4 border-b border-divider bg-bg px-4 py-[13px]">
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <span className="block size-3.25 bg-accent-800" />
+          <span className="font-heading text-lg font-semibold tracking-[0.08em] uppercase">
+            WowDesk
+          </span>
         </div>
-        <div className="font-display text-base font-bold tracking-[0.2px]">
-          WowDesk
-        </div>
-        <div className="ml-2 border-l border-[#3a4557] pl-2 text-[11px] font-medium text-ink-mute">
-          Prototype · Customer messaging &amp; CRM
-        </div>
+        <span className="h-5 w-px bg-divider" />
+        <span className="font-mono text-[10px] tracking-[0.1em] text-ink/50 uppercase">
+          WPXPO · Support workspace
+        </span>
       </div>
 
-      <div className="flex items-center gap-2 text-xs text-ink-mute">
-        <span>Widget</span>
-        <div className="relative h-0.5 w-35 rounded-sm bg-[#374156]">
-          {bridge ? (
-            <span
-              key={bridge.seq}
-              className={`absolute -top-0.75 size-2 rounded-full bg-amber opacity-0 shadow-[0_0_10px_var(--color-amber)] ${
-                bridge.direction === "right" ? "bridge-right" : "bridge-left"
-              }`}
-            />
-          ) : null}
-        </div>
-        <span>Inbox</span>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onOpenWidget}
+          className="border border-divider px-2.5 py-1.25 text-[11px] tracking-[0.06em] whitespace-nowrap uppercase hover:bg-ink/7 active:bg-ink/14"
+        >
+          Customer widget
+        </button>
+        <span className="h-5 w-px bg-divider" />
+        <span className="flex items-center gap-1.75">
+          <span className="flex size-6 items-center justify-center bg-accent-800 font-heading text-[11px] font-semibold tracking-[0.04em] text-bg">
+            {initials}
+          </span>
+          <span className="text-[12.5px]">{CURRENT_AGENT}</span>
+        </span>
       </div>
     </header>
   );

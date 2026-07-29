@@ -1,6 +1,6 @@
-import { Workspace } from "@/app/components/workspace";
+import { Inbox } from "@/app/components/inbox";
 import { seedConversations } from "@/app/lib/seed";
 
 export default function Home() {
-  return <Workspace initialConversations={seedConversations} />;
+  return <Inbox initialConversations={seedConversations} />;
 }
