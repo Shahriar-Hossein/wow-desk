@@ -1,26 +1,81 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-ink: #161b26;
+  --color-ink-soft: #212a3a;
+  --color-ink-mute: #9aa4b8;
+  --color-paper: #f1f3f6;
+  --color-card: #ffffff;
+  --color-accent: #00b39f;
+  --color-accent-dark: #00967f;
+  --color-accent-wash: #e9f9f6;
+  --color-amber: #ffb020;
+  --color-line: #e3e6ec;
+  --color-line-soft: #eff1f4;
+  --color-body: #1b2333;
+  --color-muted: #6b7280;
+
+  --font-display: var(--font-space-grotesk), sans-serif;
+  --font-sans: var(--font-inter), sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), monospace;
+
+  --radius-panel: 12px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-body);
+  font-family: var(--font-sans);
+}
+
+/* Widget -> inbox delivery indicator in the top bar. */
+@keyframes bridge-right {
+  0% {
+    left: -10px;
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(100% + 2px);
+    opacity: 0;
+  }
+}
+
+@keyframes bridge-left {
+  0% {
+    left: calc(100% + 2px);
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    left: -10px;
+    opacity: 0;
+  }
+}
+
+.bridge-right {
+  animation: bridge-right 900ms ease-in-out;
+}
+
+.bridge-left {
+  animation: bridge-left 900ms ease-in-out;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d6dae1;
+  border-radius: 8px;
 }
