@@ -5,11 +5,11 @@ import { Inbox } from "@/app/components/inbox";
 import { InsightsPage } from "@/app/components/insights-page";
 import { MetricsDashboard } from "@/app/components/metrics-dashboard";
 import { TopBar, type Tab } from "@/app/components/top-bar";
-import { seedConversations } from "@/app/lib/seed";
+import { useConversationsStore } from "@/app/lib/store";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>("inbox");
-  const [conversations, setConversations] = useState(seedConversations);
+  const { conversations, setConversations } = useConversationsStore();
 
   return (
     <>

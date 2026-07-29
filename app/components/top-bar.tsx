@@ -1,4 +1,5 @@
-import { BarChart3Icon, HeadphonesIcon, LayoutPanelLeftIcon, SparklesIcon } from "lucide-react";
+import { BarChart3Icon, HeadphonesIcon, LayoutPanelLeftIcon, RadioIcon, SparklesIcon } from "lucide-react";
+import Link from "next/link";
 import { CURRENT_AGENT } from "@/app/lib/types";
 
 export type Tab = "inbox" | "dashboard" | "insights";
@@ -53,6 +54,16 @@ export function TopBar({
       </nav>
 
       <div className="flex items-center gap-3">
+        <Link
+          href="/widget"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 rounded-md border border-border bg-background px-3 py-1.5 text-xs font-medium whitespace-nowrap hover:bg-muted"
+        >
+          <RadioIcon className="size-3.5" />
+          Live widget demo
+        </Link>
+        <span className="h-5 w-px bg-border" />
         <span className="flex items-center gap-2">
           <span className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
             {initials}

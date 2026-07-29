@@ -106,6 +106,15 @@ export function timeNow() {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
+export function initialsOf(name: string) {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 /** Live wall-clock time in an IANA timezone, e.g. "4:42:03 PM". */
 export function customerLocalTime(timezone: string) {
   try {
