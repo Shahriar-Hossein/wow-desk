@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  createConversation,
   CURRENT_AGENT,
   timeNow,
   type Conversation,
@@ -66,6 +67,13 @@ export function Inbox({
     patch(id, (c) => ({ ...c, unread: 0 }));
   };
 
+  const handleCreateConversation = (email: string, name: string) => {
+    const conversation = createConversation(email, name);
+    setConversations((cs) => [conversation, ...cs]);
+    setSelectedProduct(null);
+    setActiveId(conversation.id);
+  };
+
   const handleSend = (text: string, mode: "reply" | "note") => {
     const id = activeId;
     const note = mode === "note";
@@ -80,7 +88,7 @@ export function Inbox({
         {
           id: messageId,
           from: note ? "note" : "agent",
-          author: note ? CURRENT_AGENT : "Nabil H.",
+          author: CURRENT_AGENT,
           text,
           time: timeNow(),
           status: note ? undefined : "sent",
@@ -136,6 +144,7 @@ export function Inbox({
         conversations={filteredConversations}
         activeId={activeId}
         onSelect={selectConversation}
+        onCreate={handleCreateConversation}
       />
       <Thread
         key={`thread-${active.id}`}

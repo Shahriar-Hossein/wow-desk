@@ -101,6 +101,76 @@ export type Conversation = {
 
 export const CURRENT_AGENT = "Shihab A.";
 
+let newConversationSeq = 0;
+
+/** Builds a fresh outbound conversation for an agent-initiated email —
+ * e.g. when an agent starts a thread with a customer who hasn't written
+ * in yet. Fields we have no real data for mirror the seeded email-channel
+ * conversations rather than being left blank. */
+export function createConversation(email: string, name: string): Conversation {
+  const displayName = name.trim() || email.split("@")[0];
+  const now = new Date();
+  const day = new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(now);
+
+  newConversationSeq += 1;
+
+  return {
+    id: `new-${Date.now()}-${newConversationSeq}`,
+    name: displayName,
+    email,
+    initials: initialsOf(displayName),
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(displayName)}`,
+    subject: "New conversation",
+    status: "open",
+    priority: "Medium",
+    product: "wowstore",
+    assignee: CURRENT_AGENT,
+    time: timeNow(),
+    ticket: `WD-NEW-${newConversationSeq}`,
+    tags: [],
+    channel: "email",
+    platform: "wp",
+    unread: 0,
+    online: false,
+    lastSeen: "",
+    day: `Today · ${day}`,
+
+    country: "",
+    countryCode: "",
+    timezone: "",
+    ip: "Unknown · email channel",
+    browser: "Not available · email channel",
+    phone: "",
+    location: "",
+
+    siteUrl: "",
+    theme: "",
+    plugin: "",
+    wp: "",
+    durbin: false,
+
+    consentTelemetry: "No record — no telemetry opt-in found",
+    consentChat: "N/A · email channel",
+
+    pluginsActive: [],
+    pluginsInactive: [],
+
+    customerSince: "—",
+    totalSpent: "—",
+    lastOrderDate: "—",
+
+    orders: [],
+    pages: [],
+    history: [],
+
+    messages: [],
+  };
+}
+
 export function timeNow() {
   const d = new Date();
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;

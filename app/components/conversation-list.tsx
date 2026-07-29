@@ -12,6 +12,7 @@ import {
 } from "@/app/lib/types";
 import { Badge } from "./badge";
 import { FilterDialog, type SelectedFilters } from "./filter-dialog";
+import { NewConversationDialog } from "./new-conversation-dialog";
 
 const EMPTY_FILTERS: SelectedFilters = { types: [], priorities: [], statuses: [], tags: [] };
 
@@ -19,10 +20,12 @@ export function ConversationList({
   conversations,
   activeId,
   onSelect,
+  onCreate,
 }: {
   conversations: Conversation[];
   activeId: string;
   onSelect: (id: string) => void;
+  onCreate: (email: string, name: string) => void;
 }) {
   const [q, setQ] = useState("");
   const [priority, setPriority] = useState<"All" | Priority>("All");
@@ -62,7 +65,10 @@ export function ConversationList({
       <div className="border-b border-border p-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="font-semibold text-foreground">Inbox</h2>
-          <FilterDialog onApply={setAdvanced} />
+          <div className="flex items-center gap-2">
+            <NewConversationDialog onCreate={onCreate} />
+            <FilterDialog onApply={setAdvanced} />
+          </div>
         </div>
 
         <div className="mb-3 flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
