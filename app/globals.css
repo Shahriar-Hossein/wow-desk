@@ -1,49 +1,87 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+}
+
 /*
- * "Industry" design system — steel-blue wireframe on a light technical
- * ground. Square corners, hairline borders, blueprint registration marks.
- * Ported from the WowDesk inbox prototype; see the prototype's readme for
- * the full rationale.
+ * Light theme — white ground, blue accent. This is the primary theme for
+ * now; dark mode below is kept ready behind an explicit `.dark` class but
+ * is not auto-applied from OS preference yet.
  */
-@theme {
-  --color-bg: #f2f2f3;
-  --color-surface: #e9e9ea;
-  --color-ink: #1d1f20;
-  --color-accent: #5980a6;
-  --color-accent-2: #728fab;
+:root {
+  color-scheme: light;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.21 0.04 262);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.21 0.04 262);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.21 0.04 262);
+  --primary: oklch(0.546 0.245 262.881);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.968 0.01 255);
+  --secondary-foreground: oklch(0.21 0.04 262);
+  --muted: oklch(0.968 0.01 255);
+  --muted-foreground: oklch(0.551 0.04 257.4);
+  --accent: oklch(0.932 0.028 256);
+  --accent-foreground: oklch(0.379 0.146 265.5);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.929 0.014 255.5);
+  --input: oklch(0.929 0.014 255.5);
+  --ring: oklch(0.623 0.214 259.815);
+  --radius: 0.625rem;
+}
 
-  --color-neutral-100: #f5f5f8;
-  --color-neutral-200: #e7e7ea;
-  --color-neutral-300: #d4d4d7;
-  --color-neutral-400: #b7b7ba;
-  --color-neutral-500: #98989b;
-  --color-neutral-600: #7a7a7d;
-  --color-neutral-700: #5d5d60;
-  --color-neutral-800: #424244;
-  --color-neutral-900: #2b2b2d;
-
-  --color-accent-100: #eef6ff;
-  --color-accent-200: #d6ebff;
-  --color-accent-300: #b5d9fd;
-  --color-accent-400: #94bce3;
-  --color-accent-500: #749dc4;
-  --color-accent-600: #597ea3;
-  --color-accent-700: #416180;
-  --color-accent-800: #2c455d;
-  --color-accent-900: #1d2d3d;
-
-  /* Already a translucent mix over --color-ink — never stack Tailwind's
-     opacity modifier (e.g. divider/50) on this one, it'd double-mix. */
-  --color-divider: color-mix(in srgb, #1d1f20 16%, transparent);
-
-  --font-heading: var(--font-barlow-condensed), system-ui, sans-serif;
-  --font-body: var(--font-barlow), system-ui, sans-serif;
-  --font-mono: ui-monospace, Menlo, monospace;
-
-  --shadow-sm: 0 1px 2px color-mix(in srgb, #2b2b2d 14%, transparent);
-  --shadow-md: 0 3px 10px color-mix(in srgb, #2b2b2d 16%, transparent);
-  --shadow-lg: 0 12px 32px color-mix(in srgb, #2b2b2d 22%, transparent);
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.13 0.028 261.7);
+  --foreground: oklch(0.985 0.002 247.8);
+  --card: oklch(0.21 0.034 264.7);
+  --card-foreground: oklch(0.985 0.002 247.8);
+  --popover: oklch(0.21 0.034 264.7);
+  --popover-foreground: oklch(0.985 0.002 247.8);
+  --primary: oklch(0.623 0.214 259.815);
+  --primary-foreground: oklch(0.13 0.028 261.7);
+  --secondary: oklch(0.278 0.033 256.8);
+  --secondary-foreground: oklch(0.985 0.002 247.8);
+  --muted: oklch(0.278 0.033 256.8);
+  --muted-foreground: oklch(0.707 0.022 261.3);
+  --accent: oklch(0.278 0.033 256.8);
+  --accent-foreground: oklch(0.985 0.002 247.8);
+  --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.13 0.028 261.7);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.446 0.043 257.3);
 }
 
 html,
@@ -52,70 +90,27 @@ body {
 }
 
 body {
-  background: var(--color-bg);
-  color: var(--color-ink);
-  font-family: var(--font-body);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
 }
 
-::selection {
-  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+* {
+  border-color: var(--color-border);
 }
 
 :focus {
   outline: none;
 }
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-ring);
   outline-offset: 2px;
-}
-
-/* Blueprint registration marks — a crosshair drawn just outside a framed
-   element's corners, the system's signature "wireframe object" treatment. */
-.corner {
-  position: absolute;
-  width: 11px;
-  height: 11px;
-  color: color-mix(in srgb, var(--color-ink) 55%, transparent);
-}
-.corner::before,
-.corner::after {
-  content: "";
-  position: absolute;
-  background: currentColor;
-}
-.corner::before {
-  left: 5px;
-  top: 0;
-  width: 1px;
-  height: 100%;
-}
-.corner::after {
-  top: 5px;
-  left: 0;
-  width: 100%;
-  height: 1px;
-}
-.corner.tl {
-  top: -6px;
-  left: -6px;
-}
-.corner.tr {
-  top: -6px;
-  right: -6px;
-}
-.corner.bl {
-  bottom: -6px;
-  left: -6px;
-}
-.corner.br {
-  bottom: -6px;
-  right: -6px;
 }
 
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(5px);
+    transform: translateY(4px);
   }
   to {
     opacity: 1;
@@ -145,7 +140,9 @@ body {
   height: 9px;
 }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--color-ink) 20%, transparent);
+  background: var(--color-muted-foreground);
+  opacity: 0.3;
+  border-radius: 8px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;

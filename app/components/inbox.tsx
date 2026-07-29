@@ -1,22 +1,30 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { CURRENT_AGENT, timeNow, type Conversation, type Status } from "@/app/lib/types";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  CURRENT_AGENT,
+  timeNow,
+  type Conversation,
+  type Product,
+  type Status,
+} from "@/app/lib/types";
 import { ContextPanel } from "./context-panel";
 import { ConversationList } from "./conversation-list";
+import { ProductSidebar } from "./product-sidebar";
 import { Thread } from "./thread";
-import { TopBar } from "./top-bar";
 import { WidgetPreviewModal } from "./widget-preview-modal";
 
 const AUTO_REPLY = "ok trying that now — one sec";
 
 export function Inbox({
-  initialConversations,
+  conversations,
+  setConversations,
 }: {
-  initialConversations: Conversation[];
+  conversations: Conversation[];
+  setConversations: React.Dispatch<React.SetStateAction<Conversation[]>>;
 }) {
-  const [conversations, setConversations] = useState(initialConversations);
-  const [activeId, setActiveId] = useState(initialConversations[0].id);
+  const [activeId, setActiveId] = useState(conversations[0].id);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [typingConvId, setTypingConvId] = useState<string | null>(null);
   const [typingText, setTypingText] = useState("");
   const [widgetOpen, setWidgetOpen] = useState(false);
@@ -46,6 +54,12 @@ export function Inbox({
   };
 
   const active = conversations.find((c) => c.id === activeId) ?? conversations[0];
+
+  const filteredConversations = useMemo(
+    () =>
+      selectedProduct ? conversations.filter((c) => c.product === selectedProduct) : conversations,
+    [conversations, selectedProduct],
+  );
 
   const selectConversation = (id: string) => {
     setActiveId(id);
@@ -112,34 +126,36 @@ export function Inbox({
   };
 
   return (
-    <>
-      <TopBar onOpenWidget={() => setWidgetOpen(true)} />
-
-      <div className="grid min-h-0 flex-1 grid-cols-[306px_minmax(0,1fr)_352px]">
-        <ConversationList
-          conversations={conversations}
-          activeId={activeId}
-          onSelect={selectConversation}
-        />
-        <Thread
-          key={active.id}
-          conversation={active}
-          onStatusChange={(status) => patch(activeId, (c) => ({ ...c, status }))}
-          onAssigneeChange={(assignee) => patch(activeId, (c) => ({ ...c, assignee }))}
-          onAddTag={(tag) => patch(activeId, (c) => ({ ...c, tags: [...c.tags, tag] }))}
-          onRemoveTag={(tag) =>
-            patch(activeId, (c) => ({ ...c, tags: c.tags.filter((t) => t !== tag) }))
-          }
-          onSend={handleSend}
-          typingConvId={typingConvId}
-          typingText={typingText}
-        />
-        <ContextPanel conversation={active} />
-      </div>
+    <div className="flex min-h-0 flex-1 overflow-hidden">
+      <ProductSidebar
+        conversations={conversations}
+        selectedProduct={selectedProduct}
+        onProductSelect={setSelectedProduct}
+      />
+      <ConversationList
+        conversations={filteredConversations}
+        activeId={activeId}
+        onSelect={selectConversation}
+      />
+      <Thread
+        key={`thread-${active.id}`}
+        conversation={active}
+        onStatusChange={(status) => patch(activeId, (c) => ({ ...c, status }))}
+        onAssigneeChange={(assignee) => patch(activeId, (c) => ({ ...c, assignee }))}
+        onAddTag={(tag) => patch(activeId, (c) => ({ ...c, tags: [...c.tags, tag] }))}
+        onRemoveTag={(tag) =>
+          patch(activeId, (c) => ({ ...c, tags: c.tags.filter((t) => t !== tag) }))
+        }
+        onSend={handleSend}
+        onPreviewWidget={() => setWidgetOpen(true)}
+        typingConvId={typingConvId}
+        typingText={typingText}
+      />
+      <ContextPanel key={`context-${active.id}`} conversation={active} />
 
       {widgetOpen ? (
         <WidgetPreviewModal conversation={active} onClose={() => setWidgetOpen(false)} />
       ) : null}
-    </>
+    </div>
   );
 }

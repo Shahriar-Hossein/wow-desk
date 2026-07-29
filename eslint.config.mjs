@@ -12,8 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Vendored reference asset (design prototype export), not app source.
+    // Vendored reference assets (design prototype exports), not app source.
     "WowDesk agent inbox prototype/**",
+    "support-operations-dashboard/**",
   ]),
 ]);
 

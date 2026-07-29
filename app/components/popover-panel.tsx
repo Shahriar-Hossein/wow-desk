@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Blueprint } from "./blueprint";
 
 export function PopoverPanel({
   onClose,
@@ -32,12 +31,12 @@ export function PopoverPanel({
   }, [onClose]);
 
   return (
-    <Blueprint
+    <div
       ref={ref}
-      className={`animate-rise absolute z-40 bg-bg shadow-(--shadow-md) ${className}`}
+      className={`animate-rise absolute z-40 rounded-lg border border-border bg-popover text-popover-foreground shadow-lg ${className}`}
     >
       {children}
-    </Blueprint>
+    </div>
   );
 }
 
@@ -54,11 +53,11 @@ export function PopoverOption({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between border-b border-divider px-2.75 py-1.75 text-left text-[12.5px] last:border-b-0 hover:bg-ink/6"
+      className="flex w-full items-center justify-between px-3 py-2 text-left text-sm capitalize hover:bg-muted"
     >
       <span>{children}</span>
       {mark ? (
-        <span className="font-mono text-[10px] text-accent-700">{mark}</span>
+        <span className="text-xs font-medium text-muted-foreground">{mark}</span>
       ) : null}
     </button>
   );

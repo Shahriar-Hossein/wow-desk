@@ -1,103 +1,137 @@
 "use client";
 
-import { useState } from "react";
+import {
+  CalendarIcon,
+  ClockIcon,
+  HistoryIcon,
+  MailIcon,
+  MapPinIcon,
+  MessageCircleIcon,
+  PhoneIcon,
+  ShoppingBagIcon,
+  TrendingUpIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { lookupOrders } from "@/app/lib/seed";
-import type { Conversation, LookupOrder } from "@/app/lib/types";
-import { Blueprint } from "./blueprint";
+import {
+  PRIORITY_STYLES,
+  customerLocalTime,
+  timezoneAbbr,
+  type Conversation,
+  type LookupOrder,
+} from "@/app/lib/types";
+import { Badge } from "./badge";
 
 export function ContextPanel({ conversation }: { conversation: Conversation }) {
   const [closed, setClosed] = useState<Record<string, boolean>>({});
-  const toggle = (key: string) =>
-    setClosed((c) => ({ ...c, [key]: !c[key] }));
+  const toggle = (key: string) => setClosed((c) => ({ ...c, [key]: !c[key] }));
 
   const wp = conversation.platform === "wp";
+  const [localTime, setLocalTime] = useState(() => customerLocalTime(conversation.timezone));
+
+  useEffect(() => {
+    const id = setInterval(() => setLocalTime(customerLocalTime(conversation.timezone)), 1000);
+    return () => clearInterval(id);
+  }, [conversation.timezone]);
 
   return (
-    <aside className="grid min-h-0 grid-rows-[auto_1fr] border-l border-divider bg-bg">
-      <div className="flex flex-col gap-2.75 border-b border-divider p-3.75 pb-3.25">
-        <div className="flex items-start gap-2.75">
-          <Blueprint className="flex size-11.5 flex-none items-center justify-center bg-accent-800 font-heading text-[17px] font-semibold tracking-[0.03em] text-bg">
-            {conversation.initials}
-          </Blueprint>
+    <aside className="grid min-h-0 w-80 flex-none grid-rows-[auto_1fr] overflow-hidden border-l border-border bg-background">
+      <div className="border-b border-border bg-card p-4">
+        <div className="mb-3 flex items-center gap-3">
+          <img
+            src={conversation.avatar}
+            alt=""
+            className="size-10 flex-none rounded-full bg-muted"
+          />
           <div className="min-w-0 flex-1">
-            <div className="font-heading text-xl leading-[1.15] font-semibold">
-              {conversation.name}
+            <h3 className="truncate font-semibold text-foreground">{conversation.name}</h3>
+            <p className="truncate text-xs text-muted-foreground">
+              {conversation.channel === "email" ? "Email only" : wp ? "WordPress" : "Shopify"}
+            </p>
+          </div>
+        </div>
+
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <Badge className={PRIORITY_STYLES[conversation.priority]}>
+            <TrendingUpIcon className="mr-1 size-3" />
+            {conversation.priority} Priority
+          </Badge>
+          <Badge className="border border-border bg-transparent text-foreground">
+            <ClockIcon className="mr-1 size-3" />
+            {timezoneAbbr(conversation.timezone)}
+          </Badge>
+          <Badge className="border border-border bg-transparent text-foreground">
+            {conversation.durbin ? "Durbin matched" : "No Durbin record"}
+          </Badge>
+        </div>
+
+        <div className="flex gap-2">
+          <a
+            href={`https://wa.me/${conversation.phone.replace(/[^\d]/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border bg-background px-2.5 py-1.5 text-xs font-medium hover:bg-muted"
+          >
+            <MessageCircleIcon className="size-3.5" />
+            WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div className="min-h-0 overflow-y-auto">
+        <div className="border-b border-border p-4">
+          <h4 className="mb-3 text-sm font-semibold text-foreground">Contact Info</h4>
+          <div className="space-y-2 text-sm">
+            <a
+              href={`mailto:${conversation.email}`}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <MailIcon className="size-4 flex-none" />
+              <span className="truncate">{conversation.email}</span>
+            </a>
+            <a
+              href={`tel:${conversation.phone}`}
+              className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            >
+              <PhoneIcon className="size-4 flex-none" />
+              {conversation.phone}
+            </a>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPinIcon className="size-4 flex-none" />
+              {conversation.location}
             </div>
-            <div className="overflow-hidden text-[12.5px] text-ellipsis text-ink/62">
-              {conversation.email}
-            </div>
-            <div className="mt-1.25 flex items-center gap-1.5 font-mono text-[10px] tracking-[0.05em] text-ink/60">
-              <span
-                className={`block size-1.5 ${
-                  conversation.online ? "bg-accent-600" : "bg-ink/35"
-                }`}
-              />
-              <span>
-                {conversation.online
-                  ? "Online now · typing preview enabled"
-                  : `Last seen ${conversation.lastSeen}`}
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <ClockIcon className="size-4 flex-none" />
+              <span className="text-xs">
+                {localTime} ({timezoneAbbr(conversation.timezone)})
               </span>
+            </div>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="font-mono text-xs">{conversation.ip}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-1.25">
-          <span className="border border-accent-400 bg-accent-200 px-1.5 py-0.5 font-mono text-[9.5px] tracking-[0.07em] text-accent-900 uppercase">
-            {conversation.channel === "email"
-              ? "Email only"
-              : wp
-                ? "WordPress"
-                : "Shopify"}
-          </span>
-          <span className="border border-divider px-1.5 py-0.5 font-mono text-[9.5px] tracking-[0.07em] text-ink/62 uppercase">
-            {conversation.countryCode}
-          </span>
-          <span className="border border-divider px-1.5 py-0.5 font-mono text-[9.5px] tracking-[0.07em] whitespace-nowrap text-ink/62 uppercase">
-            {conversation.durbin ? "Durbin matched" : "No Durbin record"}
-          </span>
+        <div className="border-b border-border p-4">
+          <h4 className="mb-3 text-sm font-semibold text-foreground">Customer Info</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <CalendarIcon className="size-3.5" />
+                Customer Since
+              </span>
+              <span className="font-medium text-foreground">{conversation.customerSince}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Total Spent</span>
+              <span className="font-medium text-foreground">{conversation.totalSpent}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Last Order</span>
+              <span className="font-medium text-foreground">{conversation.lastOrderDate}</span>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="min-h-0 overflow-x-hidden overflow-y-auto">
-        <Section
-          title="Identity"
-          sectionKey="identity"
-          closed={!!closed.identity}
-          onToggle={toggle}
-        >
-          <Rows
-            rows={[
-              ["Name", conversation.name],
-              ["Email", conversation.email],
-              [
-                "Profile image",
-                conversation.durbin ? "Gravatar matched" : "Initials fallback",
-              ],
-              ["Country", `${conversation.country} · ${conversation.countryCode}`],
-              ["Local time", conversation.localTime],
-              [
-                "Active status",
-                conversation.online
-                  ? "Online now"
-                  : `Last seen ${conversation.lastSeen}`,
-              ],
-            ]}
-          />
-        </Section>
-
-        <Section
-          title="Consent state"
-          sectionKey="consent"
-          closed={!!closed.consent}
-          onToggle={toggle}
-        >
-          <Rows
-            rows={[
-              ["Telemetry", conversation.consentTelemetry],
-              ["Chat", conversation.consentChat],
-            ]}
-          />
-        </Section>
 
         <Section
           title="Platform & session"
@@ -117,7 +151,20 @@ export function ContextPanel({ conversation }: { conversation: Conversation }) {
               ],
               ["Site URL", conversation.siteUrl],
               ["Browser", conversation.browser],
-              ["IP address", conversation.ip],
+            ]}
+          />
+        </Section>
+
+        <Section
+          title="Consent state"
+          sectionKey="consent"
+          closed={!!closed.consent}
+          onToggle={toggle}
+        >
+          <Rows
+            rows={[
+              ["Telemetry", conversation.consentTelemetry],
+              ["Chat", conversation.consentChat],
             ]}
           />
         </Section>
@@ -144,43 +191,37 @@ export function ContextPanel({ conversation }: { conversation: Conversation }) {
             closed={!!closed.plugins}
             onToggle={toggle}
           >
-            <div className="flex flex-col gap-2.5 px-3.5 py-2.75">
+            <div className="flex flex-col gap-3 px-4 py-3">
               <div>
-                <div className="mb-1.5 font-mono text-[9.5px] tracking-[0.08em] text-ink/50 uppercase">
+                <div className="mb-1.5 text-xs font-medium text-muted-foreground">
                   Active · {conversation.pluginsActive.length}
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {conversation.pluginsActive.map((p) => (
-                    <span
-                      key={p}
-                      className="border border-accent-400 bg-accent-100 px-1.5 py-0.5 font-mono text-[10.5px] text-accent-900"
-                    >
+                    <Badge key={p} className="bg-primary/10 text-primary">
                       {p}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               </div>
               {conversation.pluginsInactive.length > 0 ? (
                 <div>
-                  <div className="mb-1.5 font-mono text-[9.5px] tracking-[0.08em] text-ink/50 uppercase">
+                  <div className="mb-1.5 text-xs font-medium text-muted-foreground">
                     Inactive · {conversation.pluginsInactive.length}
                   </div>
                   <div className="flex flex-wrap gap-1">
                     {conversation.pluginsInactive.map((p) => (
-                      <span
-                        key={p}
-                        className="border border-dashed border-ink/26 px-1.5 py-0.5 font-mono text-[10.5px] text-ink/55"
-                      >
+                      <Badge key={p} className="border border-dashed border-border bg-transparent text-muted-foreground">
                         {p}
-                      </span>
+                      </Badge>
                     ))}
                   </div>
                 </div>
               ) : null}
-              <div className="text-[11.5px] leading-[1.45] text-pretty text-ink/55">
-                Pulled from Durbin telemetry — conflict triage without asking the
-                customer to list anything.
-              </div>
+              <p className="text-xs leading-relaxed text-pretty text-muted-foreground">
+                Pulled from Durbin telemetry — conflict triage without asking the customer to
+                list anything.
+              </p>
             </div>
           </Section>
         ) : null}
@@ -191,7 +232,7 @@ export function ContextPanel({ conversation }: { conversation: Conversation }) {
           closed={!!closed.orders}
           onToggle={toggle}
         >
-          <OrdersSection key={conversation.id} conversation={conversation} />
+          <OrdersSection conversation={conversation} />
         </Section>
 
         {conversation.pages.length > 0 ? (
@@ -203,25 +244,22 @@ export function ContextPanel({ conversation }: { conversation: Conversation }) {
           >
             <div className="py-2">
               {conversation.pages.map((page, i) => (
-                <div
-                  key={page.path}
-                  className="flex items-baseline gap-2 px-3.5 py-1"
-                >
-                  <span className="w-3.5 font-mono text-[9.5px] text-ink/40">
+                <div key={page.path} className="flex items-baseline gap-2 px-4 py-1">
+                  <span className="w-3.5 text-xs text-muted-foreground/60">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className="flex-1 overflow-hidden font-mono text-[11px] text-ellipsis whitespace-nowrap">
+                  <span className="flex-1 overflow-hidden font-mono text-xs text-ellipsis whitespace-nowrap">
                     {page.path}
                   </span>
-                  <span className="text-[11px] whitespace-nowrap text-ink/55">
+                  <span className="text-xs whitespace-nowrap text-muted-foreground">
                     {page.dwell}
                   </span>
                 </div>
               ))}
-              <div className="px-3.5 pt-1.75 pb-0.5 text-[11.5px] leading-[1.45] text-pretty text-ink/55">
-                Intent before the customer explains it — the docs page they
-                bounced off is usually the answer.
-              </div>
+              <p className="px-4 pt-1.5 pb-0.5 text-xs leading-relaxed text-pretty text-muted-foreground">
+                Intent before the customer explains it — the docs page they bounced off is
+                usually the answer.
+              </p>
             </div>
           </Section>
         ) : null}
@@ -231,31 +269,31 @@ export function ContextPanel({ conversation }: { conversation: Conversation }) {
           sectionKey="history"
           closed={!!closed.history}
           onToggle={toggle}
+          icon={<HistoryIcon className="size-4 text-muted-foreground" />}
         >
-          <div className="py-1.5">
-            {conversation.history.map((item) => (
-              <div
-                key={item.subject}
-                className="border-b border-divider px-3.5 py-1.75 last:border-b-0"
-              >
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="flex-1 text-[12.5px] leading-[1.35]">
-                    {item.subject}
-                  </span>
-                  <span className="font-mono text-[9.5px] whitespace-nowrap text-ink/48">
-                    {item.date}
-                  </span>
-                </div>
-                <div className="mt-0.5 font-mono text-[9.5px] tracking-[0.05em] text-ink/50 uppercase">
-                  {item.meta}
-                </div>
-              </div>
-            ))}
+          <div className="py-1">
             {conversation.history.length === 0 ? (
-              <div className="px-3.5 py-2 text-[12px] text-ink/55">
+              <div className="px-4 py-2 text-xs text-muted-foreground">
                 No prior conversations.
               </div>
-            ) : null}
+            ) : (
+              conversation.history.map((item) => (
+                <div
+                  key={item.subject}
+                  className="border-b border-border px-4 py-2 last:border-b-0"
+                >
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="flex-1 text-xs">{item.subject}</span>
+                    <span className="text-[11px] whitespace-nowrap text-muted-foreground">
+                      {item.date}
+                    </span>
+                  </div>
+                  <div className="mt-0.5 text-[11px] text-muted-foreground uppercase">
+                    {item.meta}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </Section>
       </div>
@@ -268,12 +306,14 @@ function Section({
   sectionKey,
   closed,
   onToggle,
+  icon,
   children,
 }: {
   title: string;
   sectionKey: string;
   closed: boolean;
   onToggle: (key: string) => void;
+  icon?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -281,14 +321,15 @@ function Section({
       <button
         type="button"
         onClick={() => onToggle(sectionKey)}
-        className="flex w-full items-center justify-between gap-2 border-b border-divider bg-ink/3 px-3.5 py-2.25 text-left hover:bg-ink/7"
+        className="flex w-full items-center justify-between gap-2 border-b border-border bg-muted/30 px-4 py-2.5 text-left hover:bg-muted/60"
       >
-        <span className="font-heading text-[13px] font-semibold tracking-[0.09em] whitespace-nowrap uppercase">
+        <span className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          {icon}
           {title}
         </span>
-        <span className="font-mono text-xs text-ink/55">{closed ? "+" : "–"}</span>
+        <span className="text-xs text-muted-foreground">{closed ? "+" : "−"}</span>
       </button>
-      {!closed ? <div className="border-b border-divider">{children}</div> : null}
+      {!closed ? <div className="border-b border-border">{children}</div> : null}
     </div>
   );
 }
@@ -297,16 +338,9 @@ function Rows({ rows }: { rows: [string, string][] }) {
   return (
     <div className="py-1">
       {rows.map(([label, value]) => (
-        <div
-          key={label}
-          className="grid grid-cols-[92px_1fr] gap-2.25 border-l-[3px] border-l-transparent py-1.25 pr-3.5 pl-2.75"
-        >
-          <span className="pt-0.5 font-mono text-[10px] tracking-[0.04em] text-ink/50 uppercase">
-            {label}
-          </span>
-          <span className="text-[12.5px] leading-[1.45] break-words">
-            {value || "—"}
-          </span>
+        <div key={label} className="grid grid-cols-[90px_1fr] gap-2 px-4 py-1.5 text-sm">
+          <span className="pt-0.5 text-xs text-muted-foreground">{label}</span>
+          <span className="leading-relaxed wrap-break-word">{value || "—"}</span>
         </div>
       ))}
     </div>
@@ -335,43 +369,48 @@ function OrdersSection({ conversation }: { conversation: Conversation }) {
   };
 
   return (
-    <div className="flex flex-col gap-2.25 px-3.5 py-2.75">
+    <div className="flex flex-col gap-2.5 px-4 py-3">
+      <div className="mb-1 flex items-center gap-2">
+        <ShoppingBagIcon className="size-4 text-muted-foreground" />
+        <span className="text-xs font-medium text-muted-foreground">
+          {conversation.orders.length} order{conversation.orders.length === 1 ? "" : "s"}
+        </span>
+      </div>
+
       {conversation.orders.map((order) => (
-        <Blueprint key={order.id} className="bg-bg px-2.75 py-2.25">
+        <div key={order.id} className="rounded-lg border border-border bg-muted/50 p-2.5">
           <div className="flex items-baseline justify-between gap-2">
-            <span className="font-mono text-[11px] tracking-[0.03em]">{order.id}</span>
-            <span
-              className={`border px-1.25 font-mono text-[9.5px] tracking-[0.07em] uppercase ${
+            <span className="text-xs font-medium">{order.id}</span>
+            <Badge
+              className={
                 order.status === "Active"
-                  ? "border-accent-400 bg-accent-200 text-accent-900"
-                  : "border-divider text-ink/58"
-              }`}
+                  ? "bg-green-500/15 text-green-700 dark:text-green-300"
+                  : order.status === "Refunded"
+                    ? "bg-red-500/15 text-red-700 dark:text-red-300"
+                    : "border border-border bg-transparent text-muted-foreground"
+              }
             >
               {order.status}
-            </span>
+            </Badge>
           </div>
-          <div className="mt-1 font-heading text-[14.5px] leading-[1.25] font-semibold">
-            {order.product}
-          </div>
-          <div className="mt-1 flex items-baseline justify-between gap-2 text-[11.5px] text-ink/60">
+          <p className="mt-1 text-sm font-semibold text-foreground">{order.product}</p>
+          <div className="mt-1 flex items-baseline justify-between gap-2 text-xs text-muted-foreground">
             <span>
               {order.date} · {order.total}
             </span>
-            <span className="font-mono text-[9.5px]">matched by {order.match}</span>
+            <span>matched by {order.match}</span>
           </div>
-        </Blueprint>
+        </div>
       ))}
       {conversation.orders.length === 0 ? (
-        <div className="text-[12px] leading-[1.45] text-ink/55">
+        <p className="text-xs text-muted-foreground">
           No orders auto-matched by email or site URL. Search manually below.
-        </div>
+        </p>
       ) : null}
 
-      <div className="border-t border-dashed border-ink/22 pt-2.25">
-        <div className="mb-1.5 font-mono text-[9.5px] tracking-[0.08em] text-ink/50 uppercase">
-          Manual lookup
-        </div>
-        <div className="flex gap-1.25">
+      <div className="border-t border-dashed border-border pt-2.5">
+        <div className="mb-1.5 text-xs font-medium text-muted-foreground">Manual lookup</div>
+        <div className="flex gap-1.5">
           <input
             type="text"
             value={query}
@@ -383,32 +422,30 @@ function OrdersSection({ conversation }: { conversation: Conversation }) {
               }
             }}
             placeholder="Order ID or email"
-            className="min-w-0 flex-1 border border-divider bg-surface px-2 py-1.25 text-xs outline-none focus-visible:border-accent"
+            className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1.25 text-xs outline-none focus-visible:border-ring"
           />
           <button
             type="button"
             onClick={lookup}
-            className="border border-accent bg-accent px-2.5 py-1.25 text-[11px] tracking-[0.05em] text-bg uppercase hover:bg-accent-600 active:bg-accent-700"
+            className="rounded-md bg-primary px-2.5 py-1.25 text-xs font-medium text-primary-foreground hover:bg-primary/90"
           >
             Find
           </button>
         </div>
 
         {result ? (
-          <Blueprint className="animate-rise mt-2.25 bg-accent-100 px-2.75 py-2.25">
-            <div className="font-mono text-[11px]">
+          <div className="animate-rise mt-2 rounded-lg border border-primary/30 bg-primary/10 p-2.5">
+            <div className="text-xs">
               {result.id} · {result.total}
             </div>
-            <div className="mt-0.75 font-heading text-[14.5px] leading-[1.25] font-semibold">
-              {result.product}
-            </div>
-            <div className="mt-0.75 text-[11.5px] text-ink/62">
+            <div className="mt-0.5 text-sm font-semibold text-foreground">{result.product}</div>
+            <div className="mt-0.5 text-xs text-muted-foreground">
               {result.date} · {result.status} · {result.owner}
             </div>
-          </Blueprint>
+          </div>
         ) : null}
         {!result && missText ? (
-          <div className="mt-2.25 border border-dashed border-ink/26 px-2.5 py-2 text-[11.5px] text-ink/60">
+          <div className="mt-2 rounded-md border border-dashed border-border px-2.5 py-2 text-xs text-muted-foreground">
             {missText}
           </div>
         ) : null}

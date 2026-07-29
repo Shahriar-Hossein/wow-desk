@@ -1,39 +1,63 @@
+import { BarChart3Icon, HeadphonesIcon, LayoutPanelLeftIcon, SparklesIcon } from "lucide-react";
 import { CURRENT_AGENT } from "@/app/lib/types";
 
-export function TopBar({ onOpenWidget }: { onOpenWidget: () => void }) {
+export type Tab = "inbox" | "dashboard" | "insights";
+
+const TABS: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  { id: "inbox", label: "Inbox", icon: <LayoutPanelLeftIcon className="size-4" /> },
+  { id: "dashboard", label: "Dashboard", icon: <BarChart3Icon className="size-4" /> },
+  { id: "insights", label: "Insights", icon: <SparklesIcon className="size-4" /> },
+];
+
+export function TopBar({
+  activeTab,
+  onTabChange,
+}: {
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
+}) {
   const initials = CURRENT_AGENT.split(" ")
     .map((w) => w[0])
     .join("");
 
   return (
-    <header className="flex flex-none items-center justify-between gap-4 border-b border-divider bg-bg px-4 py-[13px]">
+    <header className="flex flex-none items-center justify-between gap-4 border-b border-border bg-card px-6 py-3 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
-          <span className="block size-3.25 bg-accent-800" />
-          <span className="font-heading text-lg font-semibold tracking-[0.08em] uppercase">
-            WowDesk
-          </span>
+        <div className="rounded-lg bg-primary p-2">
+          <HeadphonesIcon className="size-5 text-primary-foreground" />
         </div>
-        <span className="h-5 w-px bg-divider" />
-        <span className="font-mono text-[10px] tracking-[0.1em] text-ink/50 uppercase">
-          WPXPO · Support workspace
-        </span>
+        <div>
+          <h1 className="text-lg leading-tight font-bold text-foreground">WowDesk</h1>
+          <p className="text-xs leading-tight text-muted-foreground">
+            WPXPO support workspace
+          </p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          onClick={onOpenWidget}
-          className="border border-divider px-2.5 py-1.25 text-[11px] tracking-[0.06em] whitespace-nowrap uppercase hover:bg-ink/7 active:bg-ink/14"
-        >
-          Customer widget
-        </button>
-        <span className="h-5 w-px bg-divider" />
-        <span className="flex items-center gap-1.75">
-          <span className="flex size-6 items-center justify-center bg-accent-800 font-heading text-[11px] font-semibold tracking-[0.04em] text-bg">
+      <nav className="flex items-center gap-1.5 rounded-lg bg-muted p-1">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => onTabChange(tab.id)}
+            className={`flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+              activeTab === tab.id
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {tab.icon}
+            {tab.label}
+          </button>
+        ))}
+      </nav>
+
+      <div className="flex items-center gap-3">
+        <span className="flex items-center gap-2">
+          <span className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
             {initials}
           </span>
-          <span className="text-[12.5px]">{CURRENT_AGENT}</span>
+          <span className="text-sm">{CURRENT_AGENT}</span>
         </span>
       </div>
     </header>
