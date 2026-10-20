@@ -21,6 +21,7 @@ export type Message = {
   author?: string;
   attach?: string;
   status?: DeliveryStatus;
+  pinned?: boolean;
 };
 
 export type Order = {
@@ -67,6 +68,7 @@ export type Conversation = {
   online: boolean;
   lastSeen: string;
   day: string;
+  pinned?: boolean;
 
   country: string;
   countryCode: string;

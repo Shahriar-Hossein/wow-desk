@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Code2, Paperclip, Send, Sparkles } from "lucide-react";
+import { ChevronDown, Code2, Paperclip, Pin, PinOff, Send, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { cannedReplies } from "@/app/lib/seed";
 import { ALL_TAGS, AGENTS, STATUSES, type Conversation, type Status } from "@/app/lib/types";
@@ -17,6 +17,7 @@ export function Thread({
   onAddTag,
   onRemoveTag,
   onSend,
+  onTogglePinMessage,
   onPreviewWidget,
   typingConvId,
   typingText,
@@ -27,6 +28,7 @@ export function Thread({
   onAddTag: (tag: string) => void;
   onRemoveTag: (tag: string) => void;
   onSend: (text: string, mode: ComposeMode) => void;
+  onTogglePinMessage: (messageId: string) => void;
   onPreviewWidget: () => void;
   typingConvId: string | null;
   typingText: string;
@@ -51,9 +53,16 @@ export function Thread({
   };
 
   const untaggedOptions = ALL_TAGS.filter((t) => !conversation.tags.includes(t));
+  const pinnedMessages = conversation.messages.filter((m) => m.pinned);
+
+  const scrollToMessage = (messageId: string) => {
+    scroller.current
+      ?.querySelector(`[data-message-id="${messageId}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   return (
-    <main className="grid min-h-0 flex-1 grid-rows-[auto_1fr_auto] bg-background">
+    <main className="grid min-h-0 flex-1 grid-rows-[auto_auto_1fr_auto] bg-background">
       <div className="border-b border-border bg-card p-4 shadow-sm">
         <div className="mb-3 flex items-baseline justify-between gap-3">
           <h2 className="font-semibold text-foreground">{conversation.subject}</h2>
@@ -186,6 +195,30 @@ export function Thread({
         </div>
       </div>
 
+      <div className="flex-none">
+        {pinnedMessages.length > 0 ? (
+          <div className="flex flex-col gap-1.5 border-b border-border bg-primary/5 px-4 py-2">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
+              <Pin className="size-3.5" />
+              {pinnedMessages.length} pinned message{pinnedMessages.length > 1 ? "s" : ""}
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {pinnedMessages.map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => scrollToMessage(m.id)}
+                  title={m.text}
+                  className="max-w-72 truncate rounded-md bg-background px-2 py-1 text-left text-xs hover:bg-muted"
+                >
+                  {m.text}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+
       <div ref={scroller} className="flex min-h-0 flex-col gap-4 overflow-y-auto p-4">
         <div className="flex flex-none items-center gap-2.5">
           <span className="h-px flex-1 bg-border" />
@@ -201,6 +234,7 @@ export function Thread({
             message={message}
             customerName={conversation.name}
             customerEmail={conversation.email}
+            onTogglePin={() => onTogglePinMessage(message.id)}
           />
         ))}
 
@@ -251,10 +285,12 @@ function MessageBubble({
   message,
   customerName,
   customerEmail,
+  onTogglePin,
 }: {
   message: Conversation["messages"][number];
   customerName: string;
   customerEmail: string;
+  onTogglePin: () => void;
 }) {
   const isCust = message.from === "cust";
   const isNote = message.from === "note";
@@ -278,13 +314,26 @@ function MessageBubble({
     : message.time + (message.status ? ` · ${TICK_LABEL[message.status]}` : "");
 
   return (
-    <div className={`flex flex-none ${isCust ? "justify-start" : "justify-end"}`}>
+    <div
+      data-message-id={message.id}
+      className={`group flex flex-none ${isCust ? "justify-start" : "justify-end"}`}
+    >
       <div
         className={`flex max-w-md min-w-0 flex-col gap-1 ${isCust ? "items-start" : "items-end"}`}
       >
         <div className="flex max-w-full items-baseline gap-1.5 text-[11px] whitespace-nowrap text-muted-foreground">
           <span className="flex-none font-medium">{author}</span>
           <span className="min-w-0 overflow-hidden text-ellipsis">{badge}</span>
+          <button
+            type="button"
+            onClick={onTogglePin}
+            title={message.pinned ? "Unpin message" : "Pin message"}
+            className={`flex-none rounded p-0.5 hover:text-foreground ${
+              message.pinned ? "text-primary" : "text-muted-foreground opacity-0 group-hover:opacity-100"
+            }`}
+          >
+            {message.pinned ? <PinOff className="size-3" /> : <Pin className="size-3" />}
+          </button>
         </div>
         <div className={`rounded-lg px-4 py-2 text-sm text-pretty ${bubbleClass}`}>
           {message.text}

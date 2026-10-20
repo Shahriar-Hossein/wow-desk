@@ -3,6 +3,7 @@
 import { MessageCircle, Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { demoContacts } from "@/app/lib/demo-contacts";
+import { quickQuestions } from "@/app/lib/quick-questions";
 import { useConversationsStore } from "@/app/lib/store";
 import {
   PRODUCTS,
@@ -42,8 +43,8 @@ export function ChatHead({ product }: { product: Product }) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages.length, open]);
 
-  const send = () => {
-    const text = draft.trim();
+  const send = (override?: string) => {
+    const text = (override ?? draft).trim();
     if (!text) return;
     setDraft("");
 
@@ -127,9 +128,24 @@ export function ChatHead({ product }: { product: Product }) {
 
           <div ref={scroller} className="flex flex-1 flex-col gap-2 overflow-y-auto bg-background p-3">
             {messages.length === 0 ? (
-              <p className="m-auto max-w-50 text-center text-xs text-muted-foreground">
-                Send a message as {contact.name} — it lands in the agent inbox instantly.
-              </p>
+              <div className="m-auto flex max-w-56 flex-col items-center gap-3 text-center">
+                <p className="text-xs text-muted-foreground">
+                  Send a message as {contact.name} — it lands in the agent inbox instantly.
+                </p>
+                <div className="flex flex-col gap-1.5">
+                  {quickQuestions[product].map((q) => (
+                    <button
+                      key={q}
+                      type="button"
+                      data-question={q}
+                      onClick={(e) => send(e.currentTarget.dataset.question)}
+                      className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-left text-xs hover:bg-muted"
+                    >
+                      {q}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ) : (
               messages
                 .filter((m) => m.from !== "note")
@@ -162,7 +178,7 @@ export function ChatHead({ product }: { product: Product }) {
             />
             <button
               type="button"
-              onClick={send}
+              onClick={() => send()}
               aria-label="Send message"
               className="flex size-8 flex-none items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
             >

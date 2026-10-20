@@ -74,6 +74,17 @@ export function Inbox({
     setActiveId(conversation.id);
   };
 
+  const handleTogglePinConversation = (id: string) => {
+    patch(id, (c) => ({ ...c, pinned: !c.pinned }));
+  };
+
+  const handleTogglePinMessage = (messageId: string) => {
+    patch(activeId, (c) => ({
+      ...c,
+      messages: c.messages.map((m) => (m.id === messageId ? { ...m, pinned: !m.pinned } : m)),
+    }));
+  };
+
   const handleSend = (text: string, mode: "reply" | "note") => {
     const id = activeId;
     const note = mode === "note";
@@ -145,6 +156,7 @@ export function Inbox({
         activeId={activeId}
         onSelect={selectConversation}
         onCreate={handleCreateConversation}
+        onTogglePin={handleTogglePinConversation}
       />
       <Thread
         key={`thread-${active.id}`}
@@ -156,6 +168,7 @@ export function Inbox({
           patch(activeId, (c) => ({ ...c, tags: c.tags.filter((t) => t !== tag) }))
         }
         onSend={handleSend}
+        onTogglePinMessage={handleTogglePinMessage}
         onPreviewWidget={() => setWidgetOpen(true)}
         typingConvId={typingConvId}
         typingText={typingText}

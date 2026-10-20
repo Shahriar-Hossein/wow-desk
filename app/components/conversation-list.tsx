@@ -1,6 +1,6 @@
 "use client";
 
-import { Search } from "lucide-react";
+import { Pin, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   ASSIGNEE_FILTERS,
@@ -21,11 +21,13 @@ export function ConversationList({
   activeId,
   onSelect,
   onCreate,
+  onTogglePin,
 }: {
   conversations: Conversation[];
   activeId: string;
   onSelect: (id: string) => void;
   onCreate: (email: string, name: string) => void;
+  onTogglePin: (id: string) => void;
 }) {
   const [q, setQ] = useState("");
   const [priority, setPriority] = useState<"All" | Priority>("All");
@@ -58,7 +60,73 @@ export function ConversationList({
     });
   }, [conversations, q, priority, advanced, fAssignee, fPlatform]);
 
+  const pinnedShown = shown.filter((c) => c.pinned);
+  const unpinnedShown = shown.filter((c) => !c.pinned);
+
   const unreadCount = conversations.reduce((n, c) => n + c.unread, 0);
+
+  const renderRow = (c: Conversation) => {
+    const last = c.messages.at(-1);
+    const preview = last
+      ? (last.from === "cust" ? "" : last.from === "note" ? "Note · " : "You · ") + last.text
+      : "No messages yet";
+
+    return (
+      <div
+        key={c.id}
+        role="button"
+        tabIndex={0}
+        onClick={() => onSelect(c.id)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onSelect(c.id);
+          }
+        }}
+        className={`w-full cursor-pointer border-b border-border p-4 text-left transition-colors ${
+          c.id === activeId ? "bg-muted" : "hover:bg-muted/50"
+        }`}
+      >
+        <div className="mb-2 flex items-start gap-2.5">
+          <img src={c.avatar} alt="" className="size-9 flex-none rounded-full bg-muted" />
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-medium text-foreground">{c.name}</p>
+            <p className="text-xs text-muted-foreground">{c.ticket}</p>
+          </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onTogglePin(c.id);
+            }}
+            title={c.pinned ? "Unpin conversation" : "Pin conversation"}
+            className={`flex-none rounded p-0.5 hover:text-foreground ${
+              c.pinned ? "text-primary" : "text-muted-foreground"
+            }`}
+          >
+            <Pin className={`size-3.5 ${c.pinned ? "fill-current" : ""}`} />
+          </button>
+          <Badge className={`flex-none whitespace-nowrap ${PRIORITY_STYLES[c.priority]}`}>
+            {c.priority}
+          </Badge>
+        </div>
+        <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">{c.subject}</p>
+        <p className="mb-2 line-clamp-1 text-xs text-muted-foreground/80">{preview}</p>
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-muted-foreground">
+            {c.channel === "chat" ? "💬" : "📧"} {c.channel}
+          </span>
+          <span className="text-muted-foreground">{c.time}</span>
+        </div>
+        {c.unread > 0 ? (
+          <div className="mt-2 flex items-center gap-2">
+            <div className="size-2 rounded-full bg-primary" />
+            <span className="text-xs font-medium text-primary">{c.unread} new</span>
+          </div>
+        ) : null}
+      </div>
+    );
+  };
 
   return (
     <aside className="grid min-h-0 w-80 flex-none grid-rows-[auto_1fr_auto] border-r border-border bg-background">
@@ -131,53 +199,20 @@ export function ConversationList({
             <p className="text-muted-foreground">No conversations found</p>
           </div>
         ) : (
-          shown.map((c) => {
-            const last = c.messages.at(-1);
-            const preview = last
-              ? (last.from === "cust" ? "" : last.from === "note" ? "Note · " : "You · ") +
-                last.text
-              : "No messages yet";
-
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => onSelect(c.id)}
-                className={`w-full border-b border-border p-4 text-left transition-colors ${
-                  c.id === activeId ? "bg-muted" : "hover:bg-muted/50"
-                }`}
-              >
-                <div className="mb-2 flex items-start gap-2.5">
-                  <img
-                    src={c.avatar}
-                    alt=""
-                    className="size-9 flex-none rounded-full bg-muted"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-foreground">{c.name}</p>
-                    <p className="text-xs text-muted-foreground">{c.ticket}</p>
-                  </div>
-                  <Badge className={`flex-none whitespace-nowrap ${PRIORITY_STYLES[c.priority]}`}>
-                    {c.priority}
-                  </Badge>
-                </div>
-                <p className="mb-2 line-clamp-2 text-sm text-muted-foreground">{c.subject}</p>
-                <p className="mb-2 line-clamp-1 text-xs text-muted-foreground/80">{preview}</p>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">
-                    {c.channel === "chat" ? "💬" : "📧"} {c.channel}
-                  </span>
-                  <span className="text-muted-foreground">{c.time}</span>
-                </div>
-                {c.unread > 0 ? (
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="size-2 rounded-full bg-primary" />
-                    <span className="text-xs font-medium text-primary">{c.unread} new</span>
-                  </div>
-                ) : null}
-              </button>
-            );
-          })
+          <>
+            {pinnedShown.length > 0 ? (
+              <p className="px-4 pt-3 pb-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                Pinned
+              </p>
+            ) : null}
+            {pinnedShown.map(renderRow)}
+            {pinnedShown.length > 0 && unpinnedShown.length > 0 ? (
+              <p className="px-4 pt-3 pb-1 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase">
+                All conversations
+              </p>
+            ) : null}
+            {unpinnedShown.map(renderRow)}
+          </>
         )}
       </div>
 
